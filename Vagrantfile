@@ -11,6 +11,20 @@
 # These should be harmless if you are developing on Mac or Linux.
 
 VAGRANTFILE_API_VERSION = "2" 
+REQUIRED_PLUGINS        = %w(vagrant-vbguest)
+
+
+# Ensure Vagrant vb-guest is installed
+plugins_to_install = REQUIRED_PLUGINS.select { |plugin| not Vagrant.has_plugin? plugin }
+if not plugins_to_install.empty?
+  puts "Installing required plugins: #{plugins_to_install.join(' ')}"
+  if system "vagrant plugin install #{plugins_to_install.join(' ')}"
+    exec "vagrant #{ARGV.join(' ')}"
+  else
+    abort "Installation of one or more plugins has failed. Aborting. Please read the Bike Index README."
+  end
+end
+
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/bionic64"        
@@ -19,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "private_network", ip: "13.13.13.13"
 
   config.vm.provider :virtualbox do |v|
-    v.customize ["modifyvm", :id, "--name", "wp"]
+    v.customize ["modifyvm", :id, "--name", "sag"]
     v.customize ["modifyvm", :id, "--memory", 4096]
   end
 
@@ -31,7 +45,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/srv_config", "1"]
     v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/srv_www", "1"]
   end
-  config.vm.synced_folder ".", "/vagrant", disabled: true # Disable default share
+  # config.vm.synced_folder ".", "/vagrant", disabled: false # Disable default share
+  config.vm.synced_folder ".", "/sag_reporter", disabled: false # Disable default share
 
   # Use your local gitconfig on the box, so you can commit from within your Vagrant box.
   config.vm.provision :file, :source => "~/.gitconfig", :destination => "~/.gitconfig"
@@ -39,13 +54,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Anything in the SCRIPT block gets run at the end of the Vagrant boot dance.
   # To wit: some crucial web services don't come up properly in centos 5 for some reason.
   # This 'provision script' restarts them all manually, which fixes things.
-  # config.vm.provision :shell do |s|
-  #   s.inline = <<-SCRIPT
-  #     echo `sudo /etc/init.d/nginx restart`
-  #     echo `sudo /etc/init.d/mysqld restart`
-  #     echo `sudo /etc/init.d/php-fpm restart`
-  #     echo `sudo /etc/init.d/redis restart`
-  #   SCRIPT
-  # end
+  config.vm.provision :shell, path: "vagrant-provision.sh", privileged: true
   
 end
