@@ -13,6 +13,7 @@
 VAGRANTFILE_API_VERSION = "2" 
 REQUIRED_PLUGINS        = %w(vagrant-vbguest)
 
+Vagrant.require_version ">= 2.0.3"
 
 # Ensure Vagrant vb-guest is installed
 plugins_to_install = REQUIRED_PLUGINS.select { |plugin| not Vagrant.has_plugin? plugin }
