@@ -52,8 +52,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Use your local gitconfig on the box, so you can commit from within your Vagrant box.
   config.vm.provision :file, :source => "~/.gitconfig", :destination => "~/.gitconfig"
 
-  # Anything in the SCRIPT block gets run at the end of the Vagrant boot dance.
-  # To wit: some crucial web services don't come up properly in centos 5 for some reason.
   # This 'provision script' restarts them all manually, which fixes things.
   config.vm.provision :shell, path: "vagrant-provision.sh", privileged: true
   
