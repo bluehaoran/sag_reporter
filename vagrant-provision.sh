@@ -40,6 +40,11 @@ do
 done
 
 echo '##############################################################'
+echo "...rubydev"
+apt-get install -y ruby-dev > /dev/null 2>&1
+echo "Return Value: $?"
+
+echo '##############################################################'
 echo "...libreadline-dev"
 apt-get install -y libreadline-dev  > /dev/null 2>&1
 echo "Return Value: $?"
@@ -90,6 +95,9 @@ su vagrant -c '/usr/bin/rbenv install -s 2.5.1'
 
 echo "Globalising Ruby 2.5.1"
 su vagrant -c '/usr/bin/rbenv global 2.5.1'
+
+echo "Globally install Bundler"
+su vagrant -l -c 'gem install --install-dir /home/vagrant/.rbenv/versions/2.5.1/lib/ruby/gems/2.5.0 bundler' 
 
 echo "Globally install Rails"
 su vagrant -l -c 'gem install --install-dir /home/vagrant/.rbenv/versions/2.5.1/lib/ruby/gems/2.5.0 rails -v 4.2.10' 
